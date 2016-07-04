@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	id="WebApp_ID" version="2.5">
+	<display-name>商城系统</display-name>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+
+
+	<!-- 添加对spring的支持 -->
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+	<!-- 从类加载路径下查询applicationContext.xml文件 -->
+		<param-value>classpath:applicationContext.xml</param-value>
+	</context-param>
+
+	<!-- 定义Spring监听器，加载Spring -->
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+
+	<!-- 初始化spring中的内容 -->
+	<listener>
+		<listener-class>com.bx.action.InitAction</listener-class>
+	</listener>
+
+	<!-- 添加对struts2的支持 -->
+	<filter>
+		<filter-name>struts2</filter-name>
+		<filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>struts2</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Session延迟加载到页面 要配置在struts前 -->
+	<!-- Hibernate 允许对关联对象、属性进行延迟加载，但是必须保证延迟加载的操作限于同一个 Hibernate Session 范围之内进行。如果 
+		Service 层返回一个启用了延迟加载功能的领域对象给 Web 层，当 Web 层访问到那些需要延迟加载的数据时，由于加载领域对象的 Hibernate 
+		Session 已经关闭，这些导致延迟加载数据的访问异常 -->
+	<!-- OpenSessionInViewFilter是Spring提供的一个针对Hibernate的一个支持类， -->
+	<!-- 其主要意思是在发起一个页面请求时打开Hibernate的Session，一直保持这个Session， -->
+	<!-- 直到这个请求结束，具体是通过一个Filter来实现的。 -->
+	<!-- 由于Hibernate引入了Lazy Load特性，使得脱离Hibernate的Session周期的对象如果再想通过getter方法取到其关联对象的值， -->
+	<!-- Hibernate会抛出一个LazyLoad的Exception。所以为了解决这个问题，Spring引入了这个Filter， -->
+	<!-- 使得Hibernate的Session的生命周期变长。 -->
+	<!-- 有两种方式可以配置实现OpenSessionInView，分别是OpenSessionInViewInterceptor和OpenSessionInViewFilter， -->
+	<!-- 功能完全相同，只不过一个在web.xml配置，另一个在application.xml配置而已。 -->
+	<filter>
+		<filter-name>openSessionInViewFilter</filter-name>
+		<filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+		<init-param>
+			<param-name>singleSession</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+
+	<!-- struts请求 后缀 action -->
+	<filter-mapping>
+		<filter-name>openSessionInViewFilter</filter-name>
+		<url-pattern>*.action</url-pattern>
+	</filter-mapping>
+</web-app>
